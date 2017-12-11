@@ -68,7 +68,7 @@ function CopyTree(froot){
     return JSON.parse(JSON.stringify(froot));
 }
 function getFromEnv(env, key){
-    if(env === null)retur   n undefined;
+    if(env === null)return undefined;
     if(!env.hasOwnProperty(key)){
         return getFromEnv(env.upperenv,key);
     }else{
@@ -101,7 +101,7 @@ function CreateFunctionOn(root){
     return newFunction;
 }
 function executeParseTree(root){
-   
+    
     if(root.value instanceof Lambda){
         return ExecuteFunction(root,root.value);
     }
@@ -226,8 +226,17 @@ function executeParseTree(root){
         case 'print':
             root.value = '';
             for(var i = 0;i < root.nodes.length;i++){
+                
                 root.value += "<p>" + executeParseTree(root.nodes[i]) + "</p>";
+                
             }
+        break;
+        case 'quote':
+            root.value = UnparseTree(root.nodes[0]);
+        break;
+        case 'eval':
+            newRoot = new TreeNode();   
+            root.value = executeParseTree(CreateParseTree(executeParseTree(root.nodes[0]),newRoot));
         break;
         case 'define':
             root.value = '';
@@ -266,8 +275,8 @@ function executeParseTree(root){
                     return executeParseTree(root);
             }
             if(value === undefined){ 
-                    console.log("dddf");
-                 console.log(root.value);
+                   // console.log("dddf");
+                 //console.log(root.value);
             }else{
                 if(value instanceof Lambda){
                    root.value = ExecuteFunction(root,value); 
@@ -278,21 +287,55 @@ function executeParseTree(root){
             }
         break;
     }
-    
+    console.log(PrintTree(root));
     return root.value;
 }
-function PrintTree(froot){
-    strOut = "<b>'" + froot.value + "'</b>";
-    if(froot.nodes.length > 0){
-        strOut += " -> {<blockquote>";
-        var node = froot.nodes[0];
-        strOut += PrintTree(node);
-        for(var i = 1;i < froot.nodes.length;i++){
-            node = froot.nodes[i];
-            strOut += "," + PrintTree(node);
-        }
-        strOut += "}</blockquote>";
+function UnparseTree(froot){
+    if(froot.nodes.length === 0){
+        strOut = froot.value;
     }
+    
+    if(froot.nodes.length > 0){
+        strOut = "<p>(" + froot.value + " <blockquote>";
+        for(var i = 0;i < froot.nodes.length;i++){
+            node = froot.nodes[i];
+            strOut += " " + PrintTree(node);
+        }
+        strOut += "</blockquote>)</p>";
+    }
+    
+    return strOut;
+}
+
+function UnparseTree(froot){
+    if(froot.nodes.length === 0){
+        strOut = froot.value;
+    }
+    if(froot.nodes.length > 0){
+        strOut = "(" + froot.value;
+        for(var i = 0;i < froot.nodes.length;i++){
+            node = froot.nodes[i];
+            strOut += " " + PrintTree(node);
+        }
+        strOut += ")";
+    }
+    
+    return strOut;
+}
+function PrintTree(froot){
+    if(froot.nodes.length === 0){
+        strOut = froot.value;
+    }
+    
+    if(froot.nodes.length > 0){
+        strOut = "<p>(" + froot.value + " <blockquote>";
+        for(var i = 0;i < froot.nodes.length;i++){
+            node = froot.nodes[i];
+            strOut += " " + PrintTree(node);
+        }
+        strOut += "</blockquote>)</p>";
+    }
+    
     return strOut;
 }
 function executeCode(fid,foutputID){
